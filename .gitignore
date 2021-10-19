@@ -1,0 +1,9 @@
+.env
+oracleclient
+runscript_local
+*.db
+svn/
+bconline_sample_report.txt
+crontab
+sampledata
+*.pyc
