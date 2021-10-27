@@ -7,3 +7,6 @@ bconline_sample_report.txt
 crontab
 sampledata
 *.pyc
+.env
+junk*
+test.db

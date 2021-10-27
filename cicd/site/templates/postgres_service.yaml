@@ -1,0 +1,16 @@
+metadata:
+  name: {{ .Values.app_name }}-postgres-svc
+  labels:
+    name: {{ .Values.app_name }}-postgres-svc
+    app: {{ .Values.app_name }}
+    role: {{ .Values.label_database_role }}
+    env: {{ .Values.env }}
+spec:
+  type: NodePort
+  ports:
+   - port: 5432
+  selector:
+    app: {{ .Values.app_name }}
+    name: {{ .Values.app_name }}-postgres-db
+    role: {{ .Values.label_database_role }}
+    env: {{ .Values.env }}

@@ -3,21 +3,17 @@ import datetime
 import re
 import os
 import logging
+import glob
 
-import app.models
+#import app.models
 import app.database
 import sqlalchemy
 
 DB_ENGINE = app.database.engine
 DB_METADATA = sqlalchemy.MetaData()
 
-#models.Base.metadata.create_all(bind=engine)
-
-
-
-# eventually this will be replaced by the postgres connection
-#sqlliteEngine = sqlite+pysqlite:///:memory
-
+#1998-02-09
+DATEFORMAT = '%Y-%m-%d'
 
 LOGGER = logging.getLogger()
 
@@ -60,7 +56,6 @@ class TypeMap:
             "tombdate": sqlalchemy.types.Date,
             "effectivedate": sqlalchemy.types.Date,
             "enddate": sqlalchemy.types.Date,
-            "parttype": sqlalchemy.types.Date,
             "datenoted": sqlalchemy.types.Date,
             "date_completed": sqlalchemy.types.Date,
             "expirydate": sqlalchemy.types.Date,
@@ -125,6 +120,7 @@ class ColumnDefs:
 
     def __next__(self):
         if self.curPos >= len(self.columnDefs):
+            self.curPos = -1
             raise StopIteration
         retVal = self.columnDefs[self.curPos]
         self.curPos += 1
@@ -150,11 +146,28 @@ class ColumnDefs:
         """
         outDict = {}
         colCnt = 0
+        LOGGER.debug(f'columnDefs: {len(self)}')
         for columnDef in self:
             startPosition = columnDef.columnPosition
             columnLength = columnDef.columnLength
             endPosition = startPosition + columnLength
             dataValue = line[startPosition:endPosition].strip()
+            if columnDef.columnType == sqlalchemy.types.Integer:
+                if dataValue == '0':
+                    dataValue = 0
+                elif not dataValue:
+                    dataValue = None
+                else:
+                    dataValue = int(dataValue)
+            if columnDef.columnType == sqlalchemy.types.Date:
+                if not dataValue:
+                    dataValue = None
+                else:
+                    try:
+                        dataValue = datetime.datetime.strptime(dataValue, DATEFORMAT)
+                    except ValueError:
+                        LOGGER.warning(f'invalid date value: {dataValue}')
+                        raise
             outDict[columnDef.columnName] = dataValue
             LOGGER.debug(f'{colCnt} : {columnDef.columnName} : -{dataValue}-')
             colCnt += 1
@@ -180,12 +193,64 @@ class ReadSqlSpoolFiles:
         # used to extract the length from the column def
         replaceRegextString = '^\s*column\s+\w+\s+format\s+\w{1}'
         self.replaceRegex = re.compile(replaceRegextString)
+        # stores the linesize defined in the spoolfile
+        self.linesize = None
+
+    # def getDataTableName(self):
+    #     baseName = os.path.splitext(os.path.basename(self.inputSpoolFile))[0] + '.lis'
+    #     dirName = os.path.dirname(self.inputSpoolFile)
+    #     dataTable = os.path.join(dirName, baseName)
+
 
     def getColumnName(self, line):
         # re.split(pattern, string, maxsplit=0, flags=0)
         lineSplit = re.split('\s+', line)
         LOGGER.debug(f"split line: {lineSplit}")
         return lineSplit[1]
+
+    def isSetDef(self, line, paramName=None):
+        """parses the input line looking for a pattern starts with a
+        'set' parameter
+
+        if the added paramName is provided then looks for a set statement
+        where the parameter that is being set, and returns true if the
+        line is a 'set' line for that 'paramName'
+
+        :param line: input line to be evaluated
+        :type line: str
+        :param paramName: [name of the input parameter], defaults to None
+        :type paramName: [str], optional
+        :return: [a boolean indicating if the line is a 'set' line and if a parameter
+                  is provided whether its a set for that parameter]
+        :rtype: [bool]
+        """
+        retVal = False
+        line = line.replace(';', '')
+        lineList = re.split("\s+", line)
+        #LOGGER.debug(f'LineList: {lineList}, {paramName}')
+        if lineList[0].lower() == 'set':
+            if paramName is not None:
+                if paramName.lower() == lineList[1].lower():
+                    retVal = True
+            else:
+                retVal = True
+        #LOGGER.debug(f'retVal: {retVal}')
+        return retVal
+
+    def getSetValue(self, line):
+        """assumes that the input line is a 'set' line and if so will
+        return the value that corresponds with the set
+
+        :param line: [input line]
+        :type line: [type]
+        :return:
+        """
+        retVal = None
+        if self.isSetDef(line):
+            line = line.replace(';', '')
+            lineList = re.split("\s+", line)
+            retVal = lineList[-1]
+        return retVal
 
     def getDefs(self):
         """reads the input sql file used to generate the dump file
@@ -202,6 +267,10 @@ class ReadSqlSpoolFiles:
         with open(self.inputSpoolFile) as fh:
             for line in fh:
                 line = line.strip()
+                if self.isSetDef(line, "linesize"):
+                    linesize = self.getSetValue(line)
+                    LOGGER.debug(f"linesize: {linesize}")
+
                 if self.isColumnDef(line):
                     LOGGER.debug(f'input line: {line}')
                     colName = self.getColumnName(line)
@@ -237,61 +306,108 @@ class CreateDBTable:
             tableName = os.path.splitext(os.path.basename(sqlSpoolFile))[0]
         self.tableName = tableName
         self.sqlSpoolFile = sqlSpoolFile
-        readSpool = ReadSqlSpoolFiles(self.sqlSpoolFile)
-        self.columnDefs = readSpool.getDefs()
+        self.readSpool = ReadSqlSpoolFiles(self.sqlSpoolFile)
+        self.columnDefs = self.readSpool.getDefs()
 
     def listTables(self):
         inspector = sqlalchemy.inspect(DB_ENGINE)
-
         for table_name in inspector.get_table_names():
             for column in inspector.get_columns(table_name):
-                LOGGER.info("Column: %s" % column['name'])
+                LOGGER.debug("Column: %s" % column['name'])
 
     def createTable(self):
-
         saTable = sqlalchemy.Table(self.tableName, DB_METADATA)
         for coldef in self.columnDefs:
             column = sqlalchemy.Column(coldef.columnName, coldef.columnType)
-            saTable.append_column(column)
+            saTable.append_column(column, replace_existing=True)
 
-        LOGGER.debug(f"creating the table: {self.tableName}")
+        LOGGER.info(f"creating the table: {self.tableName}")
         DB_METADATA.create_all(DB_ENGINE)
 
-    def loadData(self, dataFile):
+    def dropTable(self):
+        table = DB_METADATA.tables[self.tableName]
+
+        LOGGER.info(f"dropping the table: {self.tableName}")
+        table.drop(DB_ENGINE)
+        #DB_METADATA.drop_all(bind=DB_ENGINE, tables=[table])
+
+    def tableExists(self, tableName, connection):
+        tableExist = True
+        if not DB_ENGINE.dialect.has_table(connection, tableName):
+            tableExist = False
+        return tableExist
+
+    #def getSourceDataRowCount(self):
+
+    def getRowCount(self, tableName):
+        Session = sqlalchemy.orm.sessionmaker(bind=DB_ENGINE)
+        session = Session()
+        rows = session.query(DB_METADATA.tables[self.tableName]).count()
+        session.close()
+        rows = int(rows)
+        LOGGER.info(f"table {self.tableName} row count: {rows} {type(rows)}")
+        return rows
+
+    def loadData(self, dataFile, dumpReplace=True):
+        """[summary]
+
+        :param dataFile: [description]
+        :type dataFile: [type]
+        :param dumpReplace: [description], defaults to True
+        :type dumpReplace: bool, optional
+        """
+        # TODO: the sql def file has a parameter called linesize.  Need to ignore the carriage returns and treat input data as a stream.
+        bufferSize = 1000
+        bufferCnt = 0
+        buffer = []
+        if dumpReplace:
+            self.dropTable()
 
         LOGGER.debug(f"column defs: {self.columnDefs}")
         with DB_ENGINE.connect() as conn:
-            with open(dataFile, "r") as f:
+            # get rows in datafile
+            LOGGER.info(f"datafile to load: {dataFile}")
+            rowsInDataFile = sum(1 for line in open(dataFile, "r", encoding='cp1252'))
+            LOGGER.info(f"rows in data file {os.path.basename(dataFile)} : {rowsInDataFile}")
+            with open(dataFile, "r", encoding='cp1252') as f:
                 table = DB_METADATA.tables[self.tableName]
-                rowsInserted = 0
-                for line in f:
-                    dataDict = self.columnDefs.getDataDict(line)
+                if not self.tableExists(self.tableName, conn):
+                    self.createTable()
+                # get rows in table
+                dbTableRowCount =  self.getRowCount(self.tableName)
+                LOGGER.info(f"src row count: {rowsInDataFile} dest row count: {dbTableRowCount}")
+                if dbTableRowCount != rowsInDataFile and dbTableRowCount != 0:
+                    # rows in source and destination do not align, so recreate
+                    self.dropTable()
+                    self.createTable()
+                    dbTableRowCount = 0
+                if not dbTableRowCount and rowsInDataFile:
+                    rowsInserted = 0
+                    for line in f:
+                        dataDict = self.columnDefs.getDataDict(line)
+                        buffer.append(dataDict)
+                        if bufferCnt >= bufferSize:
+                            conn.execute(table.insert(), buffer)
+                            bufferCnt = -1
+                            buffer = []
+                            LOGGER.info(f"rows inserted: {rowsInserted}")
 
-                    insStatement = sqlalchemy.insert(table).values(**dataDict)
-                    result = conn.execute(insStatement)
-                    if not rowsInserted % 200:
-                        LOGGER.debug(f"inserted {rowsInserted}")
-                    rowsInserted += 1
-
-#         user = Table('user', metadata_obj,
-#     Column('user_id', Integer, primary_key=True),
-#     Column('user_name', String(16), nullable=False),
-#     Column('email_address', String(60)),
-#     Column('nickname', String(50), nullable=False)
-# )
-
-
-
-
-
-
-
-
+                        #insStatement = sqlalchemy.insert(table).values(**dataDict)
+                        #result = conn.execute(insStatement)
+                        #if not rowsInserted % 200:
+                        #    LOGGER.debug(f"inserted {rowsInserted}")
+                        rowsInserted += 1
+                        bufferCnt += 1
+                    if buffer:
+                        conn.execute(table.insert(), buffer)
+                        bufferCnt = -1
+                        buffer = []
+                        LOGGER.info(f"rows {bufferCnt} inserted: {rowsInserted}")
 
 if __name__ == '__main__':
 
     # logging setup
-    LOGGER.setLevel(logging.DEBUG)
+    LOGGER.setLevel(logging.INFO)
     hndlr = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s')
     hndlr.setFormatter(formatter)
@@ -299,57 +415,36 @@ if __name__ == '__main__':
     LOGGER.debug("first test message")
 
 
-    inputDataFile = '/home/kjnether/proj/site/sampledata/srsites.lis'
-    sqlDefFile = '/home/kjnether/proj/site/runscript_local/bconline/srsites.sql'
+    # load a single table
+    # ----------------------------------
+    # inputDataFile = '/home/kjnether/proj/site/sampledata/srprfuse.lis'
+    # sqlDefFile = '/home/kjnether/proj/site/runscript_local/bconline/srprfuse.sql'
+    # createDb = CreateDBTable(sqlDefFile)
+    # createDb.createTable()
+    # createDb.listTables()
+    # createDb.loadData(inputDataFile)
 
-    createDb = CreateDBTable(sqlDefFile)
-    createDb.createTable()
-    createDb.listTables()
-    createDb.loadData(inputDataFile)
+    # loading all tables
+    tableDir = r'/home/kjnether/proj/site/sampledata/*.lis'
+    sqlDir = r'/home/kjnether/proj/site/runscript_local/bconline'
+    #files = os.listdir(tableDir)
+    datafiles = glob.glob(tableDir)
+    LOGGER.debug(f"datafiles: {datafiles}")
+    exceptionList = []
+    for curFile in datafiles:
+        if os.path.basename(curFile) == 'srprofil.lis':
+            exceptionList.append(curFile)
+    for exceptionFile in exceptionList:
+        datafiles.remove(exceptionFile)
 
-
-    def tmp():
-        # reading the sql file used to generate the lis (column delimited) dump
-        # files
-        readSpool = ReadSqlSpoolFiles(sqlDefFile)
-        columnDefs = readSpool.getDefs()
-
-        # create the datamodel in SQL Alchemy
-
-
-        colCnt = 1
-        startValue = 1
-        LOGGER.debug(f"column defs: {columnDefs}")
-        with open(inputDataFile, "r") as f:
-            for line in f:
-                #print('----------------------------------------------')
-                #print(line)
-                colCnt = 1
-                for columnDef in columnDefs:
-                    startPosition = columnDef.columnPosition
-                    columnLength = columnDef.columnLength
-                    endPosition = startPosition + columnLength
-                    dataValue = line[startPosition:endPosition].strip()
-
-                    LOGGER.debug(f'{colCnt} : {columnDef.columnName} : -{dataValue}-')
-
-                    colCnt += 1
-
-
-
-
-    #     csv_reader = csv.DictReader(f)
-
-    #     for row in csv_reader:
-    #         db_record = models.Record(
-    #             date=datetime.datetime.strptime(row["date"], "%Y-%m-%d"),
-    #             country=row["country"],
-    #             cases=row["cases"],
-    #             deaths=row["deaths"],
-    #             recoveries=row["recoveries"],
-    #         )
-    #         db.add(db_record)
-
-    #     db.commit()
-
-    # db.close()
+    LOGGER.debug(f'list of data files: {datafiles}')
+    for datafile in datafiles:
+        sqlFile = os.path.splitext(os.path.basename(datafile))[0] + '.sql'
+        sqlFileFullPath = os.path.join(sqlDir, sqlFile)
+        if not os.path.exists(sqlFileFullPath):
+            msg = f'the sql file {sqlFileFullPath} does not exist'
+            raise ValueError(msg)
+        createDb = CreateDBTable(sqlFileFullPath)
+        createDb.createTable()
+        createDb.listTables()
+        createDb.loadData(datafile, False)
