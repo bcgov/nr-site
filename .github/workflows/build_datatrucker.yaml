@@ -58,7 +58,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true # Will only build if this is not here
-        context: ./datatrucker_api
+        context: ./datatrucker_api/
         file: ./datatrucker_api/Dockerfile_API
         tags: |
           ghcr.io/${{ github.repository_owner }}/datatrucker:latest
