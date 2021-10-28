@@ -70,8 +70,6 @@ jobs:
         push: true # Will only build if this is not here
         context: ./datatrucker-server/datatrucker_ui
         file: ./datatrucker-server/datatrucker_ui/Dockerfile_UI
-        secrets: |
-            "github_token=${{ secrets.GITHUB_TOKEN }}"
         tags: |
           ghcr.io/${{ github.repository_owner }}/datatrucker-ui:latest
           ghcr.io/${{ github.repository_owner }}/datatrucker-ui:${{ steps.calculateImageTag.outputs.DATESTAMP }}
