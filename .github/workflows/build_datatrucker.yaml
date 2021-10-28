@@ -50,11 +50,11 @@ jobs:
       uses: docker/login-action@v1
       with:
         registry: ghcr.io
-        username: ${{ github.actor }}
+        username: ${{ github.repository_owner  }}
         #username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and Push Client Docker Image
+    - name: Build and Push Datatrucker Server Docker Image
       uses: docker/build-push-action@v2
       with:
         push: true # Will only build if this is not here
@@ -64,3 +64,14 @@ jobs:
           ghcr.io/${{ github.repository_owner }}/datatrucker:latest
           ghcr.io/${{ github.repository_owner }}/datatrucker:${{ steps.calculateImageTag.outputs.DATESTAMP }}
 
+    - name: Build and Push Datatrucker UI Docker Image
+      uses: docker/build-push-action@v2
+      with:
+        push: true # Will only build if this is not here
+        context: ./datatrucker-server/datatrucker_ui
+        file: ./datatrucker-server/datatrucker_ui/Dockerfile_UI
+        secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"
+        tags: |
+          ghcr.io/${{ github.repository_owner }}/datatrucker-ui:latest
+          ghcr.io/${{ github.repository_owner }}/datatrucker-ui:${{ steps.calculateImageTag.outputs.DATESTAMP }}
