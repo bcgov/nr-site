@@ -33,7 +33,7 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     - run: |
-        git clone https://gitlab.com/datatruckerio/datatrucker-server .
+        git clone https://gitlab.com/datatruckerio/datatrucker-server
         git checkout -b master
 
 
@@ -57,7 +57,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true # Will only build if this is not here
-        context: datatrucker_api
+        context: datatrucker-server/datatrucker_api
         file: Dockerfile_API
         tags: |
           ghcr.io/${{ github.repository_owner }}/datatrucker:latest
