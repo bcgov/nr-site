@@ -59,7 +59,7 @@ jobs:
       with:
         push: true # Will only build if this is not here
         context: ./datatrucker_api
-        file: Dockerfile_API
+        file: ./datatrucker_api/Dockerfile_API
         tags: |
           ghcr.io/${{ github.repository_owner }}/datatrucker:latest
           ghcr.io/${{ github.repository_owner }}/datatrucker:${{ steps.calculateImageTag.outputs.DATESTAMP }}
