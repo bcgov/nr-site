@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 pg8000 = "*"
 psycopg2-binary = "*"
+sqlacodegen = "*"
+fastapi-pagination = {extras = ["PaginationParams", "sqlalchemy"], version = "*"}
+uvicorn = "*"
 
 [dev-packages]
 
