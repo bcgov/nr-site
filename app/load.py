@@ -4,13 +4,18 @@ import re
 import os
 import logging
 import glob
+import sys
 
-#import app.models
+import models.models as models
 import app.database
 import sqlalchemy
 
 DB_ENGINE = app.database.engine
 DB_METADATA = sqlalchemy.MetaData()
+
+# creates the Table defs, eventually moving
+# to declaritive base
+models.metadata.create_all(DB_ENGINE)
 
 #1998-02-09
 DATEFORMAT = '%Y-%m-%d'
@@ -315,17 +320,34 @@ class CreateDBTable:
             for column in inspector.get_columns(table_name):
                 LOGGER.debug("Column: %s" % column['name'])
 
+    # def getTableDeclarativeBase(self):
+
+    #     app.models
+
+
     def createTable(self):
-        saTable = sqlalchemy.Table(self.tableName, DB_METADATA)
+        saTable = getattr(models, f"t_{self.tableName}")
+        colList = []
+        for col in saTable.c:
+            colName = str(col)
+            colList.append(colName.split('.')[1].lower())
+            #print(f"col: {col}")
+        LOGGER.debug(f'column list: {colList}')
+        #saTable = sqlalchemy.Table(self.tableName, DB_METADATA)
+        # making sure all the columns are in the table
         for coldef in self.columnDefs:
-            column = sqlalchemy.Column(coldef.columnName, coldef.columnType)
-            saTable.append_column(column, replace_existing=True)
+            if coldef.columnName.lower() not in colList:
+                column = sqlalchemy.Column(coldef.columnName, coldef.columnType)
+                saTable.append_column(column, replace_existing=True)
 
         LOGGER.info(f"creating the table: {self.tableName}")
-        DB_METADATA.create_all(DB_ENGINE)
+        #DB_METADATA.create_all(DB_ENGINE)
+        models.metadata.create_all(DB_ENGINE)
 
     def dropTable(self):
-        table = DB_METADATA.tables[self.tableName]
+        LOGGER.debug(f'tables: {DB_METADATA.tables}')
+        #table = DB_METADATA.tables[f't_{self.tableName}]
+        table = getattr(models, f't_{self.tableName}')
 
         LOGGER.info(f"dropping the table: {self.tableName}")
         table.drop(DB_ENGINE)
@@ -342,7 +364,8 @@ class CreateDBTable:
     def getRowCount(self, tableName):
         Session = sqlalchemy.orm.sessionmaker(bind=DB_ENGINE)
         session = Session()
-        rows = session.query(DB_METADATA.tables[self.tableName]).count()
+        table = getattr(models, f't_{self.tableName}')
+        rows = session.query(table).count()
         session.close()
         rows = int(rows)
         LOGGER.info(f"table {self.tableName} row count: {rows} {type(rows)}")
@@ -370,7 +393,8 @@ class CreateDBTable:
             rowsInDataFile = sum(1 for line in open(dataFile, "r", encoding='cp1252'))
             LOGGER.info(f"rows in data file {os.path.basename(dataFile)} : {rowsInDataFile}")
             with open(dataFile, "r", encoding='cp1252') as f:
-                table = DB_METADATA.tables[self.tableName]
+                #table = DB_METADATA.tables[self.tableName]
+                table = getattr(models, f't_{self.tableName}')
                 if not self.tableExists(self.tableName, conn):
                     self.createTable()
                 # get rows in table
@@ -417,12 +441,17 @@ if __name__ == '__main__':
 
     # load a single table
     # ----------------------------------
-    # inputDataFile = '/home/kjnether/proj/site/sampledata/srprfuse.lis'
-    # sqlDefFile = '/home/kjnether/proj/site/runscript_local/bconline/srprfuse.sql'
-    # createDb = CreateDBTable(sqlDefFile)
-    # createDb.createTable()
-    # createDb.listTables()
-    # createDb.loadData(inputDataFile)
+    LOGGER.setLevel(logging.INFO)
+    table_name = 'srevpart' # srevents  srevpart
+    inputDataFile = f'/home/kjnether/proj/site/sampledata/{table_name}.lis'
+    sqlDefFile = f'/home/kjnether/proj/site/runscript_local/bconline/{table_name}.sql'
+    createDb = CreateDBTable(sqlDefFile)
+    #createDb.dropTable()
+    createDb.createTable()
+    createDb.listTables()
+    createDb.loadData(inputDataFile, dumpReplace=False)
+
+    sys.exit()
 
     # loading all tables
     tableDir = r'/home/kjnether/proj/site/sampledata/*.lis'
