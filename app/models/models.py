@@ -55,6 +55,7 @@ class srassocs(Base):
     __table__ = t_srassocs
     sites = relationship("srsites", back_populates="site_associations", uselist=True)
 
+
 t_srlands = Table(
     "srlands",
     metadata,
@@ -69,6 +70,20 @@ class srlands(Base):
     __table__ = t_srlands
     sites = relationship("srsites", back_populates="sus_land_use", uselist=True)
 
+
+t_srprfuse = Table(
+    "srprfuse",
+    metadata,
+    Column("landuseid", Integer, primary_key=True),
+    Column("siteid", Integer, ForeignKey("srsites.siteid")),
+    Column("dateCompleted", DateTime),
+    Column("land_use_cd", String),
+)
+
+
+class srprfuse(Base):
+    __table__ = t_srprfuse
+    sites = relationship("srsites", back_populates="site_profile_use", uselist=True)
 
 
 t_srsites = Table(
@@ -100,6 +115,7 @@ t_srsites = Table(
     Column("tombdate", DateTime),
 )
 
+
 class srsites(Base):
     __table__ = t_srsites
     pinpids = relationship("srpinpid", back_populates="sites", uselist=True)
@@ -108,6 +124,7 @@ class srsites(Base):
     site_docs = relationship("srsitdoc", back_populates="sites", uselist=True)
     site_associations = relationship("srassocs", back_populates="sites", uselist=True)
     sus_land_use = relationship("srlands", back_populates="sites", uselist=True)
+    site_profile_use = relationship("srprfuse", back_populates="sites", uselist=True)
 
 
 t_srsitpar = Table(
@@ -184,8 +201,6 @@ class srevpart(Base):
     events = relationship("srevents", back_populates="eventparts", uselist=True)
 
 
-
-
 # class srassocs(Base):
 #     __tablename__ = "srassocs"
 #     associd = Column(Integer, primary_key=True)
@@ -248,8 +263,6 @@ class srdocpar(Base):
     )
 
 
-
-
 t_srprfans = Table(
     "srprfans",
     metadata,
@@ -299,18 +312,6 @@ class srprfque(Base):
     __table__ = t_srprfque
 
 
-t_srprfuse = Table(
-    "srprfuse",
-    metadata,
-    Column("landuseid", Integer, primary_key=True),
-    Column("siteid", Integer),
-    Column("dateCompleted", DateTime),
-    Column("land_use_cd", String),
-)
-
-
-class srprfuse(Base):
-    __table__ = t_srprfuse
 
 
 t_srprofil = Table(
@@ -338,3 +339,17 @@ t_srprofil = Table(
 
 class srprofil(Base):
     __table__ = t_srprofil
+
+
+# t_srprfuse = Table(
+#     "srprfuse",
+#     metadata,
+#     Column("landuseid", Integer, primary_key=True),
+#     Column("siteid", Integer),
+#     Column("dateCompleted", DateTime),
+#     Column("land_use_cd", String),
+# )
+
+
+# class srprfuse(Base):
+#     __table__ = t_srprfuse

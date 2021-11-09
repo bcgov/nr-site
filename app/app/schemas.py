@@ -103,6 +103,14 @@ class srlands(BaseModel):
     class Config:
         orm_mode = True
 
+class srprfuse(BaseModel):
+    landuseid: int
+    siteid: int
+    dateCompleted: datetime
+    land_use_cd: str
+    class Config:
+        orm_mode = True
+
 
 class srsites(BaseModel):
     siteid: int
@@ -134,13 +142,10 @@ class srsites(BaseModel):
     site_docs: List[srsitdoc]
     site_associations: List[srassocs]
     sus_land_use: List[srlands]
+    site_profile_use: List[srprfuse]
 
     class Config:
         orm_mode = True
-
-
-
-
 
 class srpinpid(BaseModel):
     pinpidid: int

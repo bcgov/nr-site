@@ -451,7 +451,7 @@ if __name__ == '__main__':
     # srsitpar
     #
     LOGGER.setLevel(logging.INFO)
-    table_name = 'srdocpar' # srevents  srevpart srsitpar srparrol srsitdoc srdocpar
+    table_name = 'srprfuse' # srevents  srevpart srsitpar srparrol srsitdoc srdocpar srprfuse
     inputDataFile = f'/home/kjnether/proj/site/sampledata/{table_name}.lis'
     sqlDefFile = f'/home/kjnether/proj/site/runscript_local/bconline/{table_name}.sql'
     createDb = CreateDBTable(sqlDefFile)
