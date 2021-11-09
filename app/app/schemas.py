@@ -95,6 +95,13 @@ class srsitdoc(BaseModel):
     class Config:
         orm_mode = True
 
+class srlands(BaseModel):
+    landid: int
+    siteid: int
+    land_use: str
+    notestring: str
+    class Config:
+        orm_mode = True
 
 
 class srsites(BaseModel):
@@ -125,9 +132,14 @@ class srsites(BaseModel):
     events: List[srevents]
     site_participants: List[srsitpar]
     site_docs: List[srsitdoc]
+    site_associations: List[srassocs]
+    sus_land_use: List[srlands]
 
     class Config:
         orm_mode = True
+
+
+
 
 
 class srpinpid(BaseModel):

@@ -40,6 +40,37 @@ class srpinpid(Base):
     sites = relationship("srsites", back_populates="pinpids", uselist=True)
 
 
+t_srassocs = Table(
+    "srassocs",
+    metadata,
+    Column("associd", Integer, primary_key=True),
+    Column("siteid", Integer, ForeignKey("srsites.siteid")),
+    Column("associatedsiteid", Integer),
+    Column("effectdate", DateTime),
+    Column("notestring", String),
+)
+
+
+class srassocs(Base):
+    __table__ = t_srassocs
+    sites = relationship("srsites", back_populates="site_associations", uselist=True)
+
+t_srlands = Table(
+    "srlands",
+    metadata,
+    Column("landid", Integer, primary_key=True),
+    Column("siteid", Integer, ForeignKey("srsites.siteid")),
+    Column("land_use", String),
+    Column("notestring", String),
+)
+
+
+class srlands(Base):
+    __table__ = t_srlands
+    sites = relationship("srsites", back_populates="sus_land_use", uselist=True)
+
+
+
 t_srsites = Table(
     "srsites",
     metadata,
@@ -69,13 +100,14 @@ t_srsites = Table(
     Column("tombdate", DateTime),
 )
 
-
 class srsites(Base):
     __table__ = t_srsites
     pinpids = relationship("srpinpid", back_populates="sites", uselist=True)
     events = relationship("srevents", back_populates="sites", uselist=True)
     site_participants = relationship("srsitpar", back_populates="sites", uselist=True)
     site_docs = relationship("srsitdoc", back_populates="sites", uselist=True)
+    site_associations = relationship("srassocs", back_populates="sites", uselist=True)
+    sus_land_use = relationship("srlands", back_populates="sites", uselist=True)
 
 
 t_srsitpar = Table(
@@ -152,19 +184,6 @@ class srevpart(Base):
     events = relationship("srevents", back_populates="eventparts", uselist=True)
 
 
-t_srassocs = Table(
-    "srassocs",
-    metadata,
-    Column("associd", Integer, primary_key=True),
-    Column("siteid", Integer),
-    Column("associatedsiteid", Integer),
-    Column("effectdate", DateTime),
-    Column("notestring", String),
-)
-
-
-class srassocs(Base):
-    __table__ = t_srassocs
 
 
 # class srassocs(Base):
@@ -229,18 +248,6 @@ class srdocpar(Base):
     )
 
 
-t_srlands = Table(
-    "srlands",
-    metadata,
-    Column("landid", Integer, primary_key=True),
-    Column("siteid", Integer),
-    Column("land_use", String),
-    Column("notestring", String),
-)
-
-
-class srlands(Base):
-    __table__ = t_srlands
 
 
 t_srprfans = Table(
