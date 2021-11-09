@@ -439,10 +439,19 @@ if __name__ == '__main__':
     LOGGER.debug("first test message")
 
 
+    # TODO:
+    # should build a proper load script,
+    # alternative is to define an order which tables are loaded or some kind of feedback
+    # process that allows the process to continue to try based on certain foreign key
+    # errors
+
     # load a single table
     # ----------------------------------
+    # srparrol
+    # srsitpar
+    #
     LOGGER.setLevel(logging.INFO)
-    table_name = 'srevpart' # srevents  srevpart
+    table_name = 'srprfuse' # srevents  srevpart srsitpar srparrol srsitdoc srdocpar srprfuse srparrol
     inputDataFile = f'/home/kjnether/proj/site/sampledata/{table_name}.lis'
     sqlDefFile = f'/home/kjnether/proj/site/runscript_local/bconline/{table_name}.sql'
     createDb = CreateDBTable(sqlDefFile)

@@ -3,6 +3,19 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 
+# class sr_all_report(BaseModel):
+
+#     @classmethod
+#     def from_orm(cls, obj: Any) -> 'Order':
+#         # `obj` is the orm model instance
+#         if hasattr(obj, 'billing'):
+#             obj.name = obj.billing.first_name
+#         return super().from_orm(obj)
+
+# https://stackoverflow.com/questions/64414030/how-to-use-nested-pydantic-models-for-sqlalchemy-in-a-flexible-way
+
+
+
 class srevpart(BaseModel):
     srevpartid: int
     eventid: int
@@ -12,8 +25,9 @@ class srevpart(BaseModel):
     class Config:
         orm_mode = True
 
+
 class srevents(BaseModel):
-    #sreventid: int
+    # sreventid: int
     siteid: int
     eventid: int
     event_type: str
@@ -24,8 +38,10 @@ class srevents(BaseModel):
     note: str
     required_action: str
     eventparts: Optional[List[srevpart]]
+
     class Config:
-       orm_mode = True
+        orm_mode = True
+
 
 class srassocs(BaseModel):
     associd: int
@@ -33,8 +49,68 @@ class srassocs(BaseModel):
     associatedsiteid: int
     effectdate: datetime
     notestring: str
+
     class Config:
         orm_mode = True
+
+class srparrol(BaseModel):
+    class Config:
+        orm_mode = True
+    partroleid: int
+    participantid: int
+    rolestring: str
+
+
+class srsitpar(BaseModel):
+    siteid: int
+    participantid: int
+    namestring: str
+    effectivedate: datetime
+    enddate: Optional[datetime]
+    notestring: str
+    parttype: str
+    participantroles: Optional[List[srparrol]]
+
+
+    class Config:
+        orm_mode = True
+
+class srdocpar(BaseModel):
+    docparid: int
+    docid: int
+    namestring: str
+    role: str
+    class Config:
+        orm_mode = True
+
+
+class srsitdoc(BaseModel):
+    siteid: int
+    docid: int
+    titlestring: str
+    submissiondate: datetime
+    documentdate: datetime
+    notestring: str
+    document_participant: List[srdocpar]
+    class Config:
+        orm_mode = True
+
+class srlands(BaseModel):
+    landid: int
+    siteid: int
+    land_use: str
+    notestring: str
+    class Config:
+        orm_mode = True
+
+class srprfuse(BaseModel):
+    landuseid: int
+    siteid: int
+    dateCompleted: datetime
+    land_use_cd: str
+    class Config:
+        orm_mode = True
+
 
 class srsites(BaseModel):
     siteid: int
@@ -62,34 +138,27 @@ class srsites(BaseModel):
     moddate: datetime
     tombdate: datetime
     events: List[srevents]
+    site_participants: List[srsitpar]
+    site_docs: List[srsitdoc]
+    site_associations: List[srassocs]
+    sus_land_use: List[srlands]
+    site_profile_use: List[srprfuse]
 
     class Config:
-       orm_mode = True
-
+        orm_mode = True
 
 class srpinpid(BaseModel):
     pinpidid: int
     siteid: int
-    pin:  Optional[int]
+    pin: Optional[int]
     pidno: int
-    crown_lands_file_no:  str
+    crown_lands_file_no: str
     legaldesc: str
     datenoted: datetime
     sites: List[srsites]
 
     class Config:
-       orm_mode = True
+        orm_mode = True
 
 
 
-
-# class sr_all_report(BaseModel):
-
-#     @classmethod
-#     def from_orm(cls, obj: Any) -> 'Order':
-#         # `obj` is the orm model instance
-#         if hasattr(obj, 'billing'):
-#             obj.name = obj.billing.first_name
-#         return super().from_orm(obj)
-
-# https://stackoverflow.com/questions/64414030/how-to-use-nested-pydantic-models-for-sqlalchemy-in-a-flexible-way
