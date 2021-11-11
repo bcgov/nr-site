@@ -85,6 +85,34 @@ class srprfuse(Base):
     __table__ = t_srprfuse
     sites = relationship("srsites", back_populates="site_profile_use", uselist=True)
 
+t_srprofil = Table(
+    "srprofil",
+    metadata,
+    Column("profileid", Integer, primary_key=True),
+    Column("siteid", Integer, ForeignKey("srsites.siteid")),
+    Column("datecompleted", DateTime),
+    Column("ownerid", Integer),
+    Column("contactid", Integer),
+    Column("completorid", Integer),
+    Column("dateReceived", DateTime),
+    Column("dateLocalAuthority", DateTime),
+    Column("dateRegistrar", DateTime),
+    Column("dateDecision", DateTime),
+    Column("dateEntered", DateTime),
+    Column("decisionText", String),
+    Column("commentString", String),
+    Column("plannedActivityComment", String),
+    Column("siteDisclosureComment", String),
+    Column("govDocumentsComment", String),
+    Column("localAuthEmail", String),
+)
+
+
+class srprofil(Base):
+    __table__ = t_srprofil
+    sites = relationship("srsites", back_populates="site_profile", uselist=True)
+
+
 
 t_srsites = Table(
     "srsites",
@@ -125,6 +153,7 @@ class srsites(Base):
     site_associations = relationship("srassocs", back_populates="sites", uselist=True)
     sus_land_use = relationship("srlands", back_populates="sites", uselist=True)
     site_profile_use = relationship("srprfuse", back_populates="sites", uselist=True)
+    site_profile = relationship("srprofil", back_populates="sites", uselist=True)
 
 
 t_srsitpar = Table(
@@ -314,31 +343,6 @@ class srprfque(Base):
 
 
 
-t_srprofil = Table(
-    "srprofil",
-    metadata,
-    Column("profileid", Integer, primary_key=True),
-    Column("siteid", Integer),
-    Column("datecompleted", DateTime),
-    Column("ownerid", Integer),
-    Column("contactid", Integer),
-    Column("completorid", Integer),
-    Column("dateReceived", DateTime),
-    Column("dateLocalAuthority", DateTime),
-    Column("dateRegistrar", DateTime),
-    Column("dateDecision", DateTime),
-    Column("dateEntered", DateTime),
-    Column("decisionText", String),
-    Column("commentString", String),
-    Column("plannedActivityComment", String),
-    Column("siteDisclosureComment", String),
-    Column("govDocumentsComment", String),
-    Column("localAuthEmail", String),
-)
-
-
-class srprofil(Base):
-    __table__ = t_srprofil
 
 
 # t_srprfuse = Table(

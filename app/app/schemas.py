@@ -111,6 +111,27 @@ class srprfuse(BaseModel):
     class Config:
         orm_mode = True
 
+class srprofil(BaseModel):
+    profileid: int
+    siteid: int
+    datecompleted: datetime
+    ownerid: int
+    contactid: int
+    completorid: int
+    dateReceived: datetime
+    dateLocalAuthority: datetime
+    dateRegistrar: Optional[datetime]
+    dateDecision: datetime
+    dateEntered: Optional[datetime]
+    decisionText: str
+    commentString: str
+    plannedActivityComment: Optional[str]
+    siteDisclosureComment: Optional[str]
+    govDocumentsComment: Optional[str]
+    localAuthEmail: Optional[str]
+
+    class Config:
+        orm_mode = True
 
 class srsites(BaseModel):
     siteid: int
@@ -143,6 +164,7 @@ class srsites(BaseModel):
     site_associations: List[srassocs]
     sus_land_use: List[srlands]
     site_profile_use: List[srprfuse]
+    site_profile: List[srprofil]
 
     class Config:
         orm_mode = True
