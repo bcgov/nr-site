@@ -108,6 +108,7 @@ class srprfuse(BaseModel):
     siteid: int
     dateCompleted: datetime
     land_use_cd: str
+    land_use_description: str
     class Config:
         orm_mode = True
 

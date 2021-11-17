@@ -78,6 +78,7 @@ t_srprfuse = Table(
     Column("siteid", Integer, ForeignKey("srsites.siteid")),
     Column("dateCompleted", DateTime),
     Column("land_use_cd", String),
+    Column("land_use_description", String),
 )
 
 

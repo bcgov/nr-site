@@ -194,7 +194,8 @@ class ReadSqlSpoolFiles:
     def __init__(self, inputSpoolFile):
         self.inputSpoolFile = inputSpoolFile
         # used to identify a line that includes a column def
-        columnDefRegexString = '^\s*column\s+\w+\s+format\s+\w+.*;$'
+        columnDefRegexString = '^\s*column\s+\w+\s+format\s+\w+.*;*$'
+
         self.coldefRegex = re.compile(columnDefRegexString)
 
         # used to extract the length from the column def
@@ -271,7 +272,7 @@ class ReadSqlSpoolFiles:
         #   where one column starts and another ends
         columnLengths = ColumnDefs()
         prevValue = 0
-        with open(self.inputSpoolFile) as fh:
+        with open(self.inputSpoolFile, 'r', encoding='cp1252') as fh:
             for line in fh:
                 line = line.strip()
                 if self.isSetDef(line, "linesize"):
@@ -489,7 +490,7 @@ class CreateDBTable:
                     conn.execute(table.insert(), buffer)
                     bufferCnt = -1
                     buffer = []
-                    LOGGER.info(f"rows {bufferCnt} inserted: {rowsInserted}")
+                    LOGGER.info(f"rows in buffer {bufferCnt} inserted: {rowsInserted}")
 
 class DataReader:
 
@@ -506,6 +507,8 @@ class DataReader:
 
     def __next__(self):
         line = self.fh.readline()
+        if not line:
+            raise StopIteration
         return line
 
     def next(self):
@@ -572,7 +575,7 @@ if __name__ == '__main__':
     # srsitpar
     #
     LOGGER.setLevel(logging.INFO)
-    table_name = 'srprofil' # srevents  srevpart srsitpar srparrol srsitdoc srdocpar srprfuse srparrol srprofil
+    table_name = 'srprfuse' # srevents  srevpart srsitpar srparrol srsitdoc srdocpar srprfuse srparrol srprofil
     inputDataFile = f'/home/kjnether/proj/site/sampledata/{table_name}.lis'
     sqlDefFile = f'/home/kjnether/proj/site/runscript_local/bconline/{table_name}.sql'
     createDb = CreateDBTable(sqlDefFile)
