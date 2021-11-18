@@ -112,6 +112,17 @@ class srprfuse(BaseModel):
     class Config:
         orm_mode = True
 
+class srprfans(BaseModel):
+    class Config:
+        orm_mode = True
+    srprfanid: int
+    siteid: int
+    questionid: int
+    date_completed: datetime
+    answer: str
+
+
+
 class srprofil(BaseModel):
     profileid: int
     siteid: int
@@ -166,6 +177,7 @@ class srsites(BaseModel):
     sus_land_use: List[srlands]
     site_profile_use: List[srprfuse]
     site_profile: List[srprofil]
+    site_answers: List[srprfans]
 
     class Config:
         orm_mode = True
