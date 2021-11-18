@@ -14,7 +14,6 @@ if 'POSTGRESQL_USER' in os.environ:
     db = os.environ['POSTGRESQL_DATABASE']
     #SQLALCHEMY_DATABASE_URL = f'postgresql+pg8000://{usr}:{pss}@127.0.0.1:5432/{db}'
     SQLALCHEMY_DATABASE_URL = f'postgresql+psycopg2://{usr}:{pss}@127.0.0.1:5432/{db}'
-
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
