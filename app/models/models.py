@@ -144,6 +144,22 @@ t_srsites = Table(
     Column("tombdate", DateTime),
 )
 
+t_srprfans = Table(
+    "srprfans",
+    metadata,
+    Column("srprfanid", Integer, primary_key=True),
+    Column("siteid", Integer,  ForeignKey("srsites.siteid")),
+    Column("questionid", Integer),
+    Column("date_completed", DateTime),
+    Column("answer", String),
+)
+
+
+class srprfans(Base):
+    __table__ = t_srprfans
+    answers = relationship("srsites", back_populates="site_answers", uselist=True)
+
+
 
 class srsites(Base):
     __table__ = t_srsites
@@ -155,6 +171,7 @@ class srsites(Base):
     sus_land_use = relationship("srlands", back_populates="sites", uselist=True)
     site_profile_use = relationship("srprfuse", back_populates="sites", uselist=True)
     site_profile = relationship("srprofil", back_populates="sites", uselist=True)
+    site_answers = relationship("srprfans", back_populates="answers", uselist=True)
 
 
 t_srsitpar = Table(
@@ -293,19 +310,6 @@ class srdocpar(Base):
     )
 
 
-t_srprfans = Table(
-    "srprfans",
-    metadata,
-    Column("srprfanid", Integer, primary_key=True),
-    Column("siteid", Integer),
-    Column("questionid", Integer),
-    Column("date_completed", DateTime),
-    Column("answer", String),
-)
-
-
-class srprfans(Base):
-    __table__ = t_srprfans
 
 
 t_srprfcat = Table(
