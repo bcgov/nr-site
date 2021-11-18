@@ -112,6 +112,18 @@ class srprfuse(BaseModel):
     class Config:
         orm_mode = True
 
+class srprfque(BaseModel):
+    class Config:
+        orm_mode = True
+
+    questionid: int
+    sequenceno: int
+    catid: int
+    parentid: Optional[int]
+    effectivedate: Optional[datetime]
+    expirydate: Optional[datetime]
+    descr: str
+
 class srprfans(BaseModel):
     class Config:
         orm_mode = True
@@ -120,6 +132,8 @@ class srprfans(BaseModel):
     questionid: int
     date_completed: datetime
     answer: str
+    questions: Optional[List[srprfque]]
+
 
 
 

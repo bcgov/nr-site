@@ -144,12 +144,30 @@ t_srsites = Table(
     Column("tombdate", DateTime),
 )
 
+t_srprfque = Table(
+    "srprfque",
+    metadata,
+    Column("questionid", Integer, primary_key=True),
+    Column("sequenceno", Integer),
+    Column("catid", Integer),
+    Column("parentid", Integer),
+    Column("effectivedate", DateTime),
+    Column("expirydate", DateTime),
+    Column("descr", String),
+)
+
+
+class srprfque(Base):
+    __table__ = t_srprfque
+    answers = relationship("srprfans", back_populates="questions", uselist=True)
+
+
 t_srprfans = Table(
     "srprfans",
     metadata,
     Column("srprfanid", Integer, primary_key=True),
     Column("siteid", Integer,  ForeignKey("srsites.siteid")),
-    Column("questionid", Integer),
+    Column("questionid", Integer, ForeignKey("srprfque.questionid")),
     Column("date_completed", DateTime),
     Column("answer", String),
 )
@@ -158,6 +176,7 @@ t_srprfans = Table(
 class srprfans(Base):
     __table__ = t_srprfans
     answers = relationship("srsites", back_populates="site_answers", uselist=True)
+    questions = relationship("srprfque", back_populates="answers", uselist=True)
 
 
 
@@ -329,21 +348,7 @@ class srprfcat(Base):
     __table__ = t_srprfcat
 
 
-t_srprfque = Table(
-    "srprfque",
-    metadata,
-    Column("questionid", Integer, primary_key=True),
-    Column("sequenceno", Integer),
-    Column("catid", Integer),
-    Column("parentid", Integer),
-    Column("effectivedate", DateTime),
-    Column("expirydate", DateTime),
-    Column("descr", String),
-)
 
-
-class srprfque(Base):
-    __table__ = t_srprfque
 
 
 

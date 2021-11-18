@@ -575,7 +575,7 @@ if __name__ == '__main__':
     # srsitpar
     #
     LOGGER.setLevel(logging.INFO)
-    # srevents  srevpart srsitpar srparrol srsitdoc srdocpar srprfuse srparrol srprofil srprfans
+    # srprfque srevents  srevpart srsitpar srparrol srsitdoc srdocpar srprfuse srparrol srprofil srprfans
     table_name = 'srprfans'
     inputDataFile = f'/home/kjnether/proj/site/sampledata/{table_name}.lis'
     sqlDefFile = f'/home/kjnether/proj/site/runscript_local/bconline/{table_name}.sql'
