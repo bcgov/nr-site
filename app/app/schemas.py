@@ -112,6 +112,17 @@ class srprfuse(BaseModel):
     class Config:
         orm_mode = True
 
+class srprfcat(BaseModel):
+    class Config:
+        orm_mode = True
+    catid: int
+    sequenceno: int
+    effectivedate: Optional[datetime]
+    expirydate: Optional[datetime]
+    question_type: str
+    descr: str
+    category_precursor: str
+
 class srprfque(BaseModel):
     class Config:
         orm_mode = True
@@ -123,6 +134,7 @@ class srprfque(BaseModel):
     effectivedate: Optional[datetime]
     expirydate: Optional[datetime]
     descr: str
+    question_category: List[srprfcat]
 
 class srprfans(BaseModel):
     class Config:

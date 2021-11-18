@@ -144,12 +144,31 @@ t_srsites = Table(
     Column("tombdate", DateTime),
 )
 
+
+t_srprfcat = Table(
+    "srprfcat",
+    metadata,
+    Column("catid", Integer, primary_key=True),
+    Column("sequenceno", Integer),
+    Column("effectivedate", DateTime),
+    Column("expirydate", DateTime),
+    Column("question_type", String),
+    Column("descr", String),
+    Column("category_precursor", String),
+)
+
+# srprfque.questioncategory(column 3) -> srprfcat.questioncategory (column 1)
+class srprfcat(Base):
+    __table__ = t_srprfcat
+    questions = relationship("srprfque", back_populates="question_category", uselist=True)
+
+
 t_srprfque = Table(
     "srprfque",
     metadata,
     Column("questionid", Integer, primary_key=True),
     Column("sequenceno", Integer),
-    Column("catid", Integer),
+    Column("catid", Integer, ForeignKey("srprfcat.catid")),
     Column("parentid", Integer),
     Column("effectivedate", DateTime),
     Column("expirydate", DateTime),
@@ -160,7 +179,7 @@ t_srprfque = Table(
 class srprfque(Base):
     __table__ = t_srprfque
     answers = relationship("srprfans", back_populates="questions", uselist=True)
-
+    question_category = relationship("srprfcat", back_populates="questions", uselist=True)
 
 t_srprfans = Table(
     "srprfans",
@@ -328,42 +347,3 @@ class srdocpar(Base):
         srsitdoc, back_populates="document_participant", uselist=True
     )
 
-
-
-
-t_srprfcat = Table(
-    "srprfcat",
-    metadata,
-    Column("catid", Integer, primary_key=True),
-    Column("sequenceno", Integer),
-    Column("effectivedate", DateTime),
-    Column("expirydate", DateTime),
-    Column("question_type", String),
-    Column("descr", String),
-    Column("category_precursor", String),
-)
-
-
-class srprfcat(Base):
-    __table__ = t_srprfcat
-
-
-
-
-
-
-
-
-
-# t_srprfuse = Table(
-#     "srprfuse",
-#     metadata,
-#     Column("landuseid", Integer, primary_key=True),
-#     Column("siteid", Integer),
-#     Column("dateCompleted", DateTime),
-#     Column("land_use_cd", String),
-# )
-
-
-# class srprfuse(Base):
-#     __table__ = t_srprfuse
