@@ -1,17 +1,20 @@
 FROM python:3.9-alpine AS BUILD_IMAGE
-
-#RUN ls -la / &&  ls -la /srv && mkdir /srv
 WORKDIR /srv
-COPY ["Pipfile", "./"]
+COPY ["Pipfile", "Pipfile.lock", "./"]
+RUN apk add build-base postgresql-dev gcc python3-dev musl-dev;\
+    python -m pip install --upgrade pip;\
+    pip install pipenv
+RUN pipenv lock --keep-outdated --requirements > requirements.txt;\
+    mkdir /install;\
+    pip install --prefix=/install -r requirements.txt
 
-# the package.json file is automatically created, Getting people
-# who are creating an SMK app may not have the skills to properly
-# edit the file so that http-server is defined as a devdependency
-# so using the uninstall as a fallback.
+FROM python:3.9-alpine
+RUN apk add postgresql-libs
+COPY --from=BUILD_IMAGE /install /usr/local
+WORKDIR /srv
+COPY ./app/app app/
 
-# apk add postgresql-dev gcc python3-dev musl-dev
-# WORKING TO HERE
-RUN apk add build-base postgresql-dev gcc python3-dev musl-dev; pip install pipenv; pipenv install
+ENTRYPOINT uvicorn main:app --host 0.0.0.0 --port 8888
 
 
 

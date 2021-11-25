@@ -7,9 +7,10 @@ name = "pypi"
 pg8000 = "*"
 psycopg2-binary = "*"
 sqlacodegen = "*"
-fastapi-pagination = {extras = ["PaginationParams", "sqlalchemy"], version = "*"}
 uvicorn = "*"
 alembic = "*"
+fastapi = "*"
+fastapi-pagination = "*"
 
 [dev-packages]
 black = "*"

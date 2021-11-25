@@ -6,7 +6,7 @@ from starlette.responses import RedirectResponse
 
 
 from . import schemas
-import models.models as models
+from .models import models
 from .routers import site_associations, sites, pin_pid
 
 from .database import SessionLocal, engine

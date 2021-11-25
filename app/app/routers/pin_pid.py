@@ -2,7 +2,8 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from .. import schemas
-import models.models as models
+#import models.models as models
+from ..models import models
 from .. import dependencies
 from fastapi_pagination import LimitOffsetPage, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate

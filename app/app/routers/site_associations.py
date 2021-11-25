@@ -3,7 +3,8 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from .. import schemas
-import models.models as models
+#import models.models as models
+from ..models import models as models
 from .. import dependencies
 import logging
 
