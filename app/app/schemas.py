@@ -222,4 +222,9 @@ class srpinpid(BaseModel):
         orm_mode = True
 
 
+class healthz(BaseModel):
+    class Config:
+        orm_mode = True
+    healthz_pk: int
+    healthz: str
 

@@ -9,18 +9,17 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
-# class Record(Base):
-#     __tablename__ = "Records"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     date = Column(Date)
-#     country = Column(String(255), index=True)
-#     cases = Column(Integer)
-#     deaths = Column(Integer)
-#     recoveries = Column(Integer)
-
-
 metadata = MetaData()
+
+t_healthz = Table(
+    "healthz",
+    metadata,
+    Column("healthz_pk", Integer, primary_key=True),
+    Column("healthz", String)
+)
+
+class healthz(Base):
+    __table__ = t_healthz
 
 t_srpinpid = Table(
     "srpinpid",
@@ -115,34 +114,7 @@ class srprofil(Base):
 
 
 
-t_srsites = Table(
-    "srsites",
-    metadata,
-    Column("siteid", Integer, primary_key=True),
-    Column("region", String),
-    Column("status", String),
-    Column("common_name", String),
-    Column("address_1", String),
-    Column("address_2", String),
-    Column("city", String),
-    Column("prov_state", String),
-    Column("postal_code", String),
-    Column("lat", Integer),
-    Column("latdeg", Integer),
-    Column("latmin", Integer),
-    Column("latsec", Integer),
-    Column("lon", Integer),
-    Column("londeg", Integer),
-    Column("lonmin", Integer),
-    Column("lonsec", Integer),
-    Column("victoria_file_no", String),
-    Column("regional_file_no", String),
-    Column("classification", String),
-    Column("gendescr", String),
-    Column("regdate", DateTime),
-    Column("moddate", DateTime),
-    Column("tombdate", DateTime),
-)
+
 
 
 t_srprfcat = Table(
@@ -197,7 +169,34 @@ class srprfans(Base):
     answers = relationship("srsites", back_populates="site_answers", uselist=True)
     questions = relationship("srprfque", back_populates="answers", uselist=True)
 
-
+t_srsites = Table(
+    "srsites",
+    metadata,
+    Column("siteid", Integer, primary_key=True),
+    Column("region", String),
+    Column("status", String),
+    Column("common_name", String),
+    Column("address_1", String),
+    Column("address_2", String),
+    Column("city", String),
+    Column("prov_state", String),
+    Column("postal_code", String),
+    Column("lat", Integer),
+    Column("latdeg", Integer),
+    Column("latmin", Integer),
+    Column("latsec", Integer),
+    Column("lon", Integer),
+    Column("londeg", Integer),
+    Column("lonmin", Integer),
+    Column("lonsec", Integer),
+    Column("victoria_file_no", String),
+    Column("regional_file_no", String),
+    Column("classification", String),
+    Column("gendescr", String),
+    Column("regdate", DateTime),
+    Column("moddate", DateTime),
+    Column("tombdate", DateTime),
+)
 
 class srsites(Base):
     __table__ = t_srsites

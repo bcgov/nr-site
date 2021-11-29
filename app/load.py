@@ -6,7 +6,7 @@ import logging
 import glob
 import sys
 
-import models.models as models
+import app.models.models as models
 import app.database
 import sqlalchemy
 
@@ -14,7 +14,7 @@ DB_ENGINE = app.database.engine
 DB_METADATA = sqlalchemy.MetaData()
 
 # creates the Table defs, eventually moving
-# to declaritive base
+# to declarative base
 models.metadata.create_all(DB_ENGINE)
 
 #1998-02-09
@@ -180,6 +180,51 @@ class ColumnDefs:
             colCnt += 1
         return outDict
 
+class DefineHealthzModel:
+    """Created an end point for health / readiness checks for the backend,
+    this class defines the simple data model used for this end point.
+
+    """
+
+    def __init__(self):
+        self.tableName = 'healthz'
+
+    def createTable(self):
+        models.metadata.create_all(DB_ENGINE)
+
+    def loadData(self):
+        """checks to see if there is a test / dummy record in the table,
+        if not then adds it.
+
+        """
+        saTable = getattr(models, f"t_{self.tableName}")
+        if self.getRows() < 1:
+            self.addRecord()
+
+    def addRecord(self):
+        table = getattr(models, f't_{self.tableName}')
+        with DB_ENGINE.connect() as conn:
+            conn.execute(table.insert(), {'healthz': 'good'})
+
+    def getRows(self):
+        Session = sqlalchemy.orm.sessionmaker(bind=DB_ENGINE)
+        session = Session()
+        table = getattr(models, f't_{self.tableName}')
+        rows = session.query(table).count()
+        session.close()
+        rows = int(rows)
+        LOGGER.info(f"table {self.tableName} row count: {rows} {type(rows)}")
+        return rows
+
+
+
+
+
+
+
+
+
+
 class ReadSqlSpoolFiles:
     """used to read the .lis files and extract:
         * column names
@@ -203,12 +248,6 @@ class ReadSqlSpoolFiles:
         self.replaceRegex = re.compile(replaceRegextString)
         # stores the linesize defined in the spoolfile
         self.linesize = None
-
-    # def getDataTableName(self):
-    #     baseName = os.path.splitext(os.path.basename(self.inputSpoolFile))[0] + '.lis'
-    #     dirName = os.path.dirname(self.inputSpoolFile)
-    #     dataTable = os.path.join(dirName, baseName)
-
 
     def getColumnName(self, line):
         # re.split(pattern, string, maxsplit=0, flags=0)
@@ -574,6 +613,12 @@ if __name__ == '__main__':
     # srparrol
     # srsitpar
     #
+    hm = DefineHealthzModel()
+    hm.createTable()
+    hm.loadData()
+    sys.exit()
+
+
     LOGGER.setLevel(logging.INFO)
     # srprfque srevents  srevpart srsitpar srparrol srsitdoc srdocpar srprfuse
     # srparrol srprofil srprfans srprfcat

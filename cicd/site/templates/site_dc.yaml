@@ -1,0 +1,94 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  labels:
+    app: {{ .Values.app_name }}-backend
+    role: {{ .Values.label_api_role }}
+    name: {{ .Values.app_name }}-backend-dc
+    env: {{ .Values.env }}
+  name:  {{ .Values.app_name }}-backend-dc
+spec:
+  replicas: 2
+  selector:
+    app: {{ .Values.app_name }}
+    deploymentconfig: {{ .Values.app_name }}-backend-dc
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+      creationTimestamp: null
+      labels:
+        deploymentconfig: {{ .Values.app_name }}-backend-dc
+        role: {{ .Values.label_api_role }}
+        app: {{ .Values.app_name }}
+        env: {{ .Values.env }}
+        name: {{ .Values.app_name }}-backend
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgresdb_params.database_port | quote }}
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: database-name
+                  name: {{ .Values.postgresdb_params.database_secret_name }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: {{ .Values.postgresdb_params.database_secret_name }}
+            - name: POSTGRES_USER_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: database-user
+                  name: {{ .Values.postgresdb_params.database_secret_name }}
+            - name: POSTGRES_HOST
+              value: "{{ .Values.app_name }}-postgres-svc"
+          #image: image-registry.openshift-image-registry.svc:5000/{{ .Values.license_plate }}-tools/kirk:{{ .Chart.AppVersion }}
+          image: {{ .Values.site_backend_image_registry}}:{{ .Values.site_backend_image_tag }}
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            httpGet:
+              path: /healthx
+              port: {{ .Values.site_backend_port }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthx
+              port: {{ .Values.site_backend_port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /healthx
+              port: {{ .Values.site_backend_port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          name: {{ .Values.app_name }}-backend
+          ports:
+            - containerPort: {{ .Values.site_backend_container_port }}
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 5

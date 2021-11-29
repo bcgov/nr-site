@@ -86,6 +86,7 @@ affinity: {}
 app_name: site
 env: dlv
 label_database_role: db
+label_api_role: app
 
 # database image info:
 #  https://catalog.redhat.com/software/containers/rhscl/postgresql-13-rhel7/60af640142119b927780b520?container-tabs=overview
@@ -98,4 +99,9 @@ postgresdb_params:
   database_user: site-db-user
   database_pvc_name: site-pvc
   database_pvc_size: "1Gi"
+  database_port: 5432
 
+site_backend_image_tag:  20211125-2211
+site_backend_image_registry: ghcr.io/bcgov/site
+site_backend_port: 8080
+site_backend_container_port: 8888
