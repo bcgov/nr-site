@@ -616,28 +616,37 @@ if __name__ == '__main__':
     hm = DefineHealthzModel()
     hm.createTable()
     hm.loadData()
-    sys.exit()
-
 
     LOGGER.setLevel(logging.INFO)
-    # srprfque srevents  srevpart srsitpar srparrol srsitdoc srdocpar srprfuse
-    # srparrol srprofil srprfans srprfcat
-    table_name = 'srprfcat'
-    inputDataFile = f'/home/kjnether/proj/site/sampledata/{table_name}.lis'
-    sqlDefFile = f'/home/kjnether/proj/site/runscript_local/bconline/{table_name}.sql'
-    createDb = CreateDBTable(sqlDefFile)
-    #createDb.dropTable()
-    createDb.createTable()
-    createDb.listTables()
-    createDb.loadData2(inputDataFile, dumpReplace=True)
+    # # srprfque srevents  srevpart srsitpar srparrol srsitdoc srdocpar srprfuse
+    # # srparrol srprofil srprfans srprfcat
+    # table_name = 'srprfcat'
+    # inputDataFile = f'/home/kjnether/proj/site/sampledata/{table_name}.lis'
+    # sqlDefFile = f'/home/kjnether/proj/site/runscript_local/bconline/{table_name}.sql'
+    # createDb = CreateDBTable(sqlDefFile)
+    # #createDb.dropTable()
+    # createDb.createTable()
+    # createDb.listTables()
+    # createDb.loadData2(inputDataFile, dumpReplace=True)
 
-    sys.exit()
+    # sys.exit()
 
     # loading all tables
     tableDir = r'/home/kjnether/proj/site/sampledata/*.lis'
+    tableDirOnly = os.path.dirname(tableDir)
     sqlDir = r'/home/kjnether/proj/site/runscript_local/bconline'
     #files = os.listdir(tableDir)
     datafiles = glob.glob(tableDir)
+    LOGGER.info(f"datafiles: {datafiles}")
+
+    # reorder to allow loading without running into foreign key constraint issues
+
+    datafiles.insert(0, datafiles.pop(datafiles.index(os.path.join(tableDirOnly, 'srsitdoc.lis'))))
+    datafiles.insert(0, datafiles.pop(datafiles.index(os.path.join(tableDirOnly, 'srevents.lis'))))
+    datafiles.insert(0, datafiles.pop(datafiles.index(os.path.join(tableDirOnly, 'srsitpar.lis'))))
+    datafiles.insert(0, datafiles.pop(datafiles.index(os.path.join(tableDirOnly, 'srprfque.lis'))))
+    datafiles.insert(0, datafiles.pop(datafiles.index(os.path.join(tableDirOnly, 'srprfcat.lis'))))
+    datafiles.insert(0, datafiles.pop(datafiles.index(os.path.join(tableDirOnly, 'srsites.lis'))))
     LOGGER.debug(f"datafiles: {datafiles}")
     exceptionList = []
     for curFile in datafiles:
@@ -656,4 +665,4 @@ if __name__ == '__main__':
         createDb = CreateDBTable(sqlFileFullPath)
         createDb.createTable()
         createDb.listTables()
-        createDb.loadData(datafile, False)
+        createDb.loadData2(datafile, False)

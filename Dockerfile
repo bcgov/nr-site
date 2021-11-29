@@ -14,7 +14,7 @@ COPY --from=BUILD_IMAGE /install /usr/local
 WORKDIR /srv
 COPY ./app/app app/
 
-ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8888"]
 
 
 
