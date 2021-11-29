@@ -10,7 +10,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-   - port: 8888
+   - port: {{ .Values.site_backend_container_port }}
   selector:
     app: {{ .Values.app_name }}
     name: {{ .Values.app_name }}-backend

@@ -9,7 +9,7 @@ RUN pipenv lock --keep-outdated --requirements > requirements.txt;\
     pip install --prefix=/install -r requirements.txt
 
 FROM python:3.9-alpine
-RUN apk add postgresql-libs
+RUN apk add postgresql-libs curl busybox-extras
 COPY --from=BUILD_IMAGE /install /usr/local
 WORKDIR /srv
 COPY ./app/app app/

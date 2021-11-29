@@ -12,7 +12,7 @@ metadata:
 spec:
   #host: {{ .Values.routehost }}
   port:
-    targetPort: 8080-tcp
+    targetPort: {{ .Values.site_backend_container_port }}-tcp
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
