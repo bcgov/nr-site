@@ -101,7 +101,7 @@ postgresdb_params:
   database_pvc_size: "1Gi"
   database_port: 5432
 
-site_backend_image_tag:  20211129-2207
+site_backend_image_tag:  20211129-2236
 site_backend_image_registry: ghcr.io/bcgov/site
 site_backend_port: 8080
 site_backend_container_port: 8888
