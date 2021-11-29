@@ -43,12 +43,12 @@ spec:
                 secretKeyRef:
                   key: database-name
                   name: {{ .Values.postgresdb_params.database_secret_name }}
-            - name: POSTGRES_PASSWORD
+            - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: database-password
                   name: {{ .Values.postgresdb_params.database_secret_name }}
-            - name: POSTGRES_USER_NAME
+            - name: POSTGRESQL_USER
               valueFrom:
                 secretKeyRef:
                   key: database-user
@@ -57,29 +57,30 @@ spec:
               value: "{{ .Values.app_name }}-postgres-svc"
           #image: image-registry.openshift-image-registry.svc:5000/{{ .Values.license_plate }}-tools/kirk:{{ .Chart.AppVersion }}
           image: {{ .Values.site_backend_image_registry}}:{{ .Values.site_backend_image_tag }}
-          imagePullPolicy: IfNotPresent
-          readinessProbe:
-            httpGet:
-              path: /healthx
-              port: {{ .Values.site_backend_port }}
-            initialDelaySeconds: 5
-            timeoutSeconds: 2
-            periodSeconds: 10
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /healthx
-              port: {{ .Values.site_backend_port }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            failureThreshold: 5
-          startupProbe:
-            httpGet:
-              path: /healthx
-              port: {{ .Values.site_backend_port }}
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            failureThreshold: 3
+          imagePullPolicy: Always
+          # IfNotPresent
+          # readinessProbe:
+          #   httpGet:
+          #     path: /healthx
+          #     port: {{ .Values.site_backend_port }}
+          #   initialDelaySeconds: 5
+          #   timeoutSeconds: 2
+          #   periodSeconds: 10
+          #   failureThreshold: 3
+          # livenessProbe:
+          #   httpGet:
+          #     path: /healthx
+          #     port: {{ .Values.site_backend_port }}
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5
+          #   failureThreshold: 5
+          # startupProbe:
+          #   httpGet:
+          #     path: /healthx
+          #     port: {{ .Values.site_backend_port }}
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 10
+          #   failureThreshold: 3
           name: {{ .Values.app_name }}-backend
           ports:
             - containerPort: {{ .Values.site_backend_container_port }}
