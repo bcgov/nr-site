@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
         - env:
-            - name: POSTGRES_PORT
+            - name: POSTGRESQL_PORT
               value: {{ .Values.postgresdb_params.database_port | quote }}
             - name: POSTGRESQL_DATABASE
               valueFrom:
@@ -53,7 +53,7 @@ spec:
                 secretKeyRef:
                   key: database-user
                   name: {{ .Values.postgresdb_params.database_secret_name }}
-            - name: POSTGRES_HOST
+            - name: POSTGRESQL_HOST
               value: "{{ .Values.app_name }}-postgres-svc"
           #image: image-registry.openshift-image-registry.svc:5000/{{ .Values.license_plate }}-tools/kirk:{{ .Chart.AppVersion }}
           image: {{ .Values.site_backend_image_registry}}:{{ .Values.site_backend_image_tag }}

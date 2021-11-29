@@ -15,11 +15,14 @@ if 'POSTGRESQL_USER' in os.environ:
     host = '0.0.0.0'
     if 'POSTGRESQL_HOST' in os.environ:
         host = os.environ['POSTGRESQL_HOST']
+        LOGGER.debug("dbhost: {host}")
     dbport = 5432
-    if 'POSTGRES_PORT' in  os.environ:
-        dbport = os.environ['POSTGRES_PORT']
+    if 'POSTGRESQL_PORT' in  os.environ:
+        dbport = os.environ['POSTGRESQL_PORT']
+        LOGGER.debug("dbport: {dbport}")
     #SQLALCHEMY_DATABASE_URL = f'postgresql+pg8000://{usr}:{pss}@127.0.0.1:5432/{db}'
     SQLALCHEMY_DATABASE_URL = f'postgresql+psycopg2://{usr}:{pss}@{host}:{dbport}/{db}'
+    LOGGER.debug(f"connstr: {SQLALCHEMY_DATABASE_URL.replace(pss, '***')}")
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
