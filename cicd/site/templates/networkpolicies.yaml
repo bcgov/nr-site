@@ -1,12 +1,18 @@
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: allow-same-namespace
+  name: allow-from-openshift-ingress
 spec:
-  podSelector: {}
+  # This policy allows any pod with a route & service combination
+  # to accept traffic from the OpenShift router pods. This is
+  # required for things outside of OpenShift (like the Internet)
+  # to reach your pods.
   ingress:
     - from:
-        - podSelector: {}
+        - namespaceSelector:
+            matchLabels:
+              network.openshift.io/policy-group: ingress
+  podSelector: {}
   policyTypes:
     - Ingress
 
@@ -15,14 +21,11 @@ spec:
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: allow-from-openshift-ingress
+  name: allow-same-namespace
 spec:
+  # Allow all pods within the current namespace to communicate
+  # to one another.
   podSelector: {}
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              network.openshift.io/policy-group: ingress
-  policyTypes:
-    - Ingress
-
+  - from:
+    - podSelector: {}

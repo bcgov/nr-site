@@ -38,6 +38,9 @@ class srpinpid(Base):
     __table__ = t_srpinpid
     sites = relationship("srsites", back_populates="pinpids", uselist=True)
 
+class srpinpid_nr(Base):
+    __table__ = t_srpinpid
+
 
 t_srassocs = Table(
     "srassocs",

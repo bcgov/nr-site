@@ -35,8 +35,8 @@ class srevents(BaseModel):
     eventdate: Optional[datetime]
     approval_date: Optional[datetime]
     ministry_contact: str
-    note: str
-    required_action: str
+    note: Optional[str]
+    required_action: Optional[str]
     eventparts: Optional[List[srevpart]]
 
     class Config:
@@ -48,7 +48,7 @@ class srassocs(BaseModel):
     siteid: int
     associatedsiteid: int
     effectdate: datetime
-    notestring: str
+    notestring: Optional[str]
 
     class Config:
         orm_mode = True
@@ -67,7 +67,7 @@ class srsitpar(BaseModel):
     namestring: str
     effectivedate: datetime
     enddate: Optional[datetime]
-    notestring: str
+    notestring: Optional[str]
     parttype: str
     participantroles: Optional[List[srparrol]]
 
@@ -90,7 +90,7 @@ class srsitdoc(BaseModel):
     titlestring: str
     submissiondate: datetime
     documentdate: datetime
-    notestring: str
+    notestring: Optional[str]
     document_participant: List[srdocpar]
     class Config:
         orm_mode = True
@@ -99,7 +99,7 @@ class srlands(BaseModel):
     landid: int
     siteid: int
     land_use: str
-    notestring: str
+    notestring: Optional[str]
     class Config:
         orm_mode = True
 
@@ -177,10 +177,10 @@ class srsites(BaseModel):
     status: str
     common_name: str
     address_1: str
-    address_2: str
+    address_2: Optional[str]
     city: str
     prov_state: str
-    postal_code: str
+    postal_code: Optional[str]
     lat: int
     latdeg: int
     latmin: int
@@ -189,10 +189,10 @@ class srsites(BaseModel):
     londeg: int
     lonmin: int
     lonsec: int
-    victoria_file_no: str
-    regional_file_no: str
+    victoria_file_no: Optional[str]
+    regional_file_no: Optional[str]
     classification: str
-    gendescr: str
+    gendescr: Optional[str]
     regdate: datetime
     moddate: datetime
     tombdate: datetime
@@ -213,10 +213,22 @@ class srpinpid(BaseModel):
     siteid: int
     pin: Optional[int]
     pidno: int
-    crown_lands_file_no: str
+    crown_lands_file_no: Optional[str]
     legaldesc: str
     datenoted: datetime
     sites: List[srsites]
+
+    class Config:
+        orm_mode = True
+
+class srpinpid_nr(BaseModel):
+    pinpidid: int
+    siteid: int
+    pin: Optional[int]
+    pidno: int
+    crown_lands_file_no: Optional[str]
+    legaldesc: str
+    datenoted: datetime
 
     class Config:
         orm_mode = True

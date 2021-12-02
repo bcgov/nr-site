@@ -3,16 +3,17 @@ kind: Route
 metadata:
   labels:
     app: {{ .Values.app_name }}
-    component: {{ .Values.app_name }}-backend-rt
     env: {{ .Values.env }}
     role: {{ .Values.label_api_role }}
-    route-ingress: 'true'
     certbot-managed: 'true'
+    name: {{ .Values.app_name }}-backend-rt
   name: {{ .Values.app_name }}-backend-rt
 spec:
   #host: {{ .Values.routehost }}
-  port:
-    targetPort: {{ .Values.site_backend_container_port }}-tcp
+  # port:
+  #   targetPort: 8888-tcp
+    #targetPort: {{ .Values.site_backend_port }}-tcp
+    #targetPort: 80-tcp
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect

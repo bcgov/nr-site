@@ -13,12 +13,12 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
 router = APIRouter()
-
-@router.get("/pinpid", response_model=LimitOffsetPage[schemas.srpinpid])
+# doesn't inlcude related tables
+@router.get("/pinpid", response_model=LimitOffsetPage[schemas.srpinpid_nr])
 def show_records(db: Session = Depends(dependencies.get_db)):
-    return paginate(db.query(models.srpinpid))
+    return paginate(db.query(models.srpinpid_nr))
 
-
+# currently includes relationships... possibly want to only include pinpid table data.
 @router.get("/pinpid/{pidno}", response_model=schemas.srpinpid)
 def read_pinpid(pidno: int, db: Session = Depends(dependencies.get_db)):
     pidrec = crud.get_pinpid(db, pidno=pidno)

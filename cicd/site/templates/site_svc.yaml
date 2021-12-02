@@ -10,7 +10,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-   - port: {{ .Values.site_backend_container_port }}
+    - port: {{ .Values.site_backend_container_port }}
+      targetPort: {{ .Values.site_backend_container_port }}
+      name: http
+      protocol: TCP
   selector:
     app: {{ .Values.app_name }}
     name: {{ .Values.app_name }}-backend
