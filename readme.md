@@ -1,3 +1,5 @@
+[![Lifecycle:Retired](https://img.shields.io/badge/Lifecycle-Retired-d45500)](<Redirect-URL>)
+
 # Overview
 
 Work / code related to rebuilding of the contaminated sites registry application
